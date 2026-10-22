@@ -34,7 +34,7 @@ export interface ModuleItem {
 
 export interface QuizQuestion {
   id: string;
-  category: 'Derechos' | 'Deberes' | 'Prohibiciones' | 'Faltas y Sanciones' | 'Etapa Productiva' | 'Identidad SENA';
+  category: string;
   question: string;
   options: string[];
   correctIndex: number;

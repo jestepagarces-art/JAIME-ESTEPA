@@ -5,14 +5,14 @@ import {
   CheckCircle2, 
   XCircle, 
   RotateCcw, 
-  Sparkles, 
   Flame, 
   HelpCircle,
   FileCheck2,
   ArrowRight,
   Scale
 } from 'lucide-react';
-import { QUIZ_QUESTIONS } from '../data/senaData';
+import { getQuizQuestions } from '../data/senaData';
+import { useLanguage } from '../context/LanguageContext';
 
 interface GamifiedQuizProps {
   onGainXp: (amount: number) => void;
@@ -27,6 +27,9 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   onViewCertificate,
   savedScore,
 }) => {
+  const { t, language } = useLanguage();
+  const questions = getQuizQuestions(language);
+
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [showCurrentFeedback, setShowCurrentFeedback] = useState<boolean>(false);
@@ -34,8 +37,8 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   const [quizFinished, setQuizFinished] = useState<boolean>(savedScore !== undefined && savedScore > 0);
   const [finalScore, setFinalScore] = useState<number>(savedScore || 0);
 
-  const currentQuestion = QUIZ_QUESTIONS[currentIdx];
-  const isAnswered = selectedAnswers[currentQuestion.id] !== undefined;
+  const safeIdx = Math.min(currentIdx, questions.length - 1);
+  const currentQuestion = questions[safeIdx];
   const currentSelectedAnswer = selectedAnswers[currentQuestion.id];
   const isCorrect = currentSelectedAnswer === currentQuestion.correctIndex;
 
@@ -62,18 +65,18 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
   const handleNextQuestion = () => {
     setShowCurrentFeedback(false);
 
-    if (currentIdx + 1 < QUIZ_QUESTIONS.length) {
+    if (currentIdx + 1 < questions.length) {
       setCurrentIdx((idx) => idx + 1);
     } else {
       // Calculate final score
       let correctCount = 0;
-      QUIZ_QUESTIONS.forEach((q) => {
+      questions.forEach((q) => {
         if (selectedAnswers[q.id] === q.correctIndex) {
           correctCount += 1;
         }
       });
 
-      const percentage = Math.round((correctCount / QUIZ_QUESTIONS.length) * 100);
+      const percentage = Math.round((correctCount / questions.length) * 100);
       setFinalScore(percentage);
       setQuizFinished(true);
 
@@ -108,41 +111,37 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
-          <span>Evaluación Formativa Integral</span>
-          <span aria-hidden="true">·</span>
-          <span>8 Preguntas Clave</span>
-          <span aria-hidden="true">·</span>
-          <span>Aprobación: ≥ 70%</span>
+        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+          <span>{t.quizBadge}</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00324D] tracking-tight">
-          Evaluación Gamificada: Reglamento del Aprendiz
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00324D] dark:text-white tracking-tight">
+          {t.quizTitle}
         </h2>
-        <p className="text-sm text-slate-600 max-w-lg mx-auto">
-          Demuestra tu dominio sobre derechos, deberes, comités y etapa productiva para validar tu inducción y generar tu certificado institucional.
+        <p className="text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto">
+          {t.quizSubtitle}
         </p>
       </div>
 
       {!quizFinished ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
           {/* Header Metric Strip */}
-          <div className="flex items-center justify-between text-xs text-slate-600 border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div className="flex items-center gap-1.5 font-semibold">
-              <span className="text-slate-400">Pregunta</span>
-              <span className="font-mono text-slate-900">{currentIdx + 1}</span>
-              <span className="text-slate-400">de</span>
-              <span className="font-mono text-slate-900">{QUIZ_QUESTIONS.length}</span>
+              <span className="text-slate-400">{t.quizQuestionCounter}</span>
+              <span className="font-mono text-slate-900 dark:text-white">{safeIdx + 1}</span>
+              <span className="text-slate-400">/</span>
+              <span className="font-mono text-slate-900 dark:text-white">{questions.length}</span>
             </div>
 
             {/* Streak flame */}
             <div className="flex items-center gap-3">
               {streak > 1 && (
-                <div className="flex items-center gap-1 text-amber-600 font-bold animate-pulse">
+                <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold animate-pulse">
                   <Flame className="w-4 h-4 fill-amber-500" />
-                  <span>Racha x{streak}</span>
+                  <span>{t.activeStreakLabel} x{streak}</span>
                 </div>
               )}
-              <span className="text-slate-400 font-mono text-[11px] bg-slate-100 px-2 py-0.5 rounded">
+              <span className="text-slate-400 font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
                 {currentQuestion.category}
               </span>
             </div>
@@ -150,7 +149,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
 
           {/* Question Text */}
           <div className="space-y-3 py-2">
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900 leading-snug">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white leading-snug">
               {currentQuestion.question}
             </h3>
           </div>
@@ -161,14 +160,14 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
               const isOptionChosen = currentSelectedAnswer === optIdx;
               const isOptionCorrect = optIdx === currentQuestion.correctIndex;
 
-              let optionStyle = 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-800';
+              let optionStyle = 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 text-slate-800 dark:text-slate-200';
               if (showCurrentFeedback) {
                 if (isOptionCorrect) {
-                  optionStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold ring-1 ring-emerald-500';
+                  optionStyle = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-950 dark:text-emerald-100 font-semibold ring-1 ring-emerald-500';
                 } else if (isOptionChosen) {
-                  optionStyle = 'border-rose-400 bg-rose-50 text-rose-950 ring-1 ring-rose-400';
+                  optionStyle = 'border-rose-400 bg-rose-50 dark:bg-rose-950/40 text-rose-950 dark:text-rose-100 ring-1 ring-rose-400';
                 } else {
-                  optionStyle = 'border-slate-200 bg-slate-50 text-slate-400 opacity-60';
+                  optionStyle = 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-400 opacity-60';
                 }
               }
 
@@ -179,7 +178,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                   disabled={showCurrentFeedback}
                   className={`w-full text-left p-4 rounded-xl border text-sm transition-all flex items-start gap-3 cursor-pointer ${optionStyle}`}
                 >
-                  <span className="w-6 h-6 rounded-md bg-slate-150 text-slate-700 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="w-6 h-6 rounded-md bg-slate-150 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
                     {String.fromCharCode(65 + optIdx)}
                   </span>
                   <span className="leading-snug">{opt}</span>
@@ -193,39 +192,44 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
             <div
               className={`p-5 rounded-xl border ${
                 isCorrect
-                  ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
-                  : 'bg-rose-50 border-rose-300 text-rose-950'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-100'
+                  : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-100'
               } space-y-3 animate-fadeIn`}
             >
               <div className="flex items-center gap-2 font-bold text-sm">
                 {isCorrect ? (
                   <>
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                    <span>¡Respuesta Correcta! (+50 XP)</span>
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <span>{language === 'en' ? 'Correct Answer! (+50 XP)' : '¡Respuesta Correcta! (+50 XP)'}</span>
                   </>
                 ) : (
                   <>
-                    <XCircle className="w-5 h-5 text-rose-600" />
-                    <span>Respuesta Incorrecta</span>
+                    <XCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                    <span>{language === 'en' ? 'Incorrect Answer' : 'Respuesta Incorrecta'}</span>
                   </>
                 )}
               </div>
 
-              <p className="text-xs leading-relaxed text-slate-800">
+              <p className="text-xs leading-relaxed text-slate-800 dark:text-slate-200">
                 {currentQuestion.explanation}
               </p>
 
-              <div className="flex items-center gap-2 text-[11px] font-mono text-slate-600 bg-white/70 p-2 rounded border border-black/5">
-                <Scale className="w-3.5 h-3.5 text-[#39A900]" />
-                <span>Base legal: {currentQuestion.legalArticle}</span>
+              <div className="flex items-center gap-2 text-[11px] font-mono text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-slate-800/80 p-2 rounded border border-black/5 dark:border-white/5">
+                <Scale className="w-3.5 h-3.5 text-[#39A900] dark:text-emerald-400" />
+                <span>{t.legalBasisLabel} {currentQuestion.legalArticle}</span>
               </div>
 
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={handleNextQuestion}
-                  className="px-5 py-2 text-xs font-bold text-white bg-[#00324D] hover:bg-[#002538] rounded-lg cursor-pointer transition-colors flex items-center gap-1.5"
+                  className="px-5 py-2 text-xs font-bold text-white bg-[#00324D] dark:bg-slate-800 hover:bg-[#002538] dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors flex items-center gap-1.5"
                 >
-                  <span>{currentIdx + 1 < QUIZ_QUESTIONS.length ? 'Siguiente Pregunta' : 'Finalizar Evaluación'}</span>
+                  <span>
+                    {safeIdx + 1 < questions.length 
+                      ? t.btnNextQuestion 
+                      : (language === 'en' ? 'Finish Evaluation' : 'Finalizar Evaluación')
+                    }
+                  </span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -234,10 +238,10 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
         </div>
       ) : (
         /* Evaluation Results Card */
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-6 shadow-xs">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-6 shadow-xs">
           <div
             className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${
-              finalScore >= 70 ? 'bg-emerald-100 text-[#39A900]' : 'bg-rose-100 text-rose-600'
+              finalScore >= 70 ? 'bg-emerald-100 dark:bg-emerald-950/80 text-[#39A900] dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400'
             }`}
           >
             {finalScore >= 70 ? (
@@ -248,22 +252,29 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-2xl font-extrabold text-[#00324D]">
-              {finalScore >= 70 ? '¡Felicitaciones! Has Aprobado la Inducción' : 'No alcanzaste el puntaje mínimo requerido'}
+            <h3 className="text-2xl font-extrabold text-[#00324D] dark:text-white">
+              {finalScore >= 70 ? t.quizSuccessTitle : t.quizFailTitle}
             </h3>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {finalScore >= 70
-                ? 'Demostraste un dominio sólido del Reglamento del Aprendiz SENA (Acuerdo 0009 de 2024).'
-                : 'El puntaje mínimo para certificar la inducción es 70%. Repasa los módulos e inténtalo nuevamente.'}
+                ? (language === 'en' 
+                    ? 'You demonstrated solid mastery of the SENA Apprentice Regulations (Agreement 0009 of 2024).' 
+                    : 'Demostraste un dominio sólido del Reglamento del Aprendiz SENA (Acuerdo 0009 de 2024).'
+                  )
+                : (language === 'en'
+                    ? 'The minimum score to certify induction is 70%. Review the modules and try again.'
+                    : 'El puntaje mínimo para certificar la inducción es 70%. Repasa los módulos e inténtalo nuevamente.'
+                  )
+              }
             </p>
           </div>
 
           {/* Score display */}
-          <div className="inline-block p-4 bg-slate-50 rounded-xl border border-slate-200">
-            <span className="text-xs text-slate-500 uppercase tracking-wider block font-semibold mb-1">
-              Calificación Obtenida
+          <div className="inline-block p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+            <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider block font-semibold mb-1">
+              {t.quizFinalScoreLabel}
             </span>
-            <span className="text-4xl font-black font-mono tabular-nums text-[#00324D]">
+            <span className="text-4xl font-black font-mono tabular-nums text-[#00324D] dark:text-white">
               {finalScore}%
             </span>
           </div>
@@ -272,10 +283,10 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <button
               onClick={handleRetake}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Repetir Evaluación</span>
+              <span>{t.btnRetryQuiz}</span>
             </button>
 
             {finalScore >= 70 && (
@@ -284,7 +295,7 @@ export const GamifiedQuiz: React.FC<GamifiedQuizProps> = ({
                 className="px-6 py-2.5 text-xs font-bold text-white bg-[#39A900] hover:bg-[#329600] rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-2"
               >
                 <FileCheck2 className="w-4 h-4" />
-                <span>Generar y Ver Mi Certificado Oficial</span>
+                <span>{t.btnViewCertificate}</span>
               </button>
             )}
           </div>

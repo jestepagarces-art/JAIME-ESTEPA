@@ -3,7 +3,10 @@ import {
   DEFAULT_PROFILE, 
   INDUCTION_MODULES, 
   INDUCTION_BADGES,
-  DERECHOS_DEBERES_ITEMS
+  DERECHOS_DEBERES_ITEMS,
+  getInductionModules,
+  getInductionBadges,
+  getDerechosDeberes
 } from './data/senaData';
 import { ApprenticeProfile, InductionProgress } from './types/induction';
 import { Navbar, UserRole } from './components/Navbar';
@@ -29,9 +32,13 @@ import {
   Users,
   Eye
 } from 'lucide-react';
-import { LanguageProvider } from './context/LanguageContext';
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
 function MainApp() {
+  const { language, t } = useLanguage();
+  const currentModules = getInductionModules(language);
+  const currentBadges = getInductionBadges(language);
+  const currentDerechosDeberes = getDerechosDeberes(language);
   // Determine if there's a URL role hint (e.g. ?role=aprendiz or ?role=instructor)
   const urlRoleHint: 'instructor' | 'aprendiz' = (() => {
     try {
@@ -244,7 +251,7 @@ function MainApp() {
       const newXp = prev.xp + amount;
       const newlyUnlocked = [...prev.unlockedBadges];
 
-      INDUCTION_BADGES.forEach((b) => {
+      currentBadges.forEach((b) => {
         if (newXp >= b.requiredXp && !newlyUnlocked.includes(b.id)) {
           newlyUnlocked.push(b.id);
         }
@@ -360,7 +367,7 @@ function MainApp() {
           <div className="flex items-center gap-2">
             <Eye className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>
-              <strong>Vista previa del Aprendiz:</strong> Estás explorando el contenido formativo tal como lo visualizan tus aprendices.
+              <strong>{language === 'en' ? 'Apprentice Preview:' : 'Vista previa del Aprendiz:'}</strong> {t.previewBannerText}
             </span>
           </div>
           <button
@@ -368,7 +375,7 @@ function MainApp() {
             className="px-3 py-1 bg-[#39A900] hover:bg-[#329600] text-white font-semibold rounded-lg shrink-0 flex items-center gap-1.5 cursor-pointer shadow-xs"
           >
             <Users className="w-3.5 h-3.5" />
-            <span>Volver al Panel del Instructor</span>
+            <span>{t.previewBannerReturnBtn}</span>
           </button>
         </div>
       )}
@@ -377,7 +384,7 @@ function MainApp() {
       {(activeTab === 'modules' || activeTab === 'plan') && (
         <HeroSection
           profile={profile}
-          totalModules={INDUCTION_MODULES.length}
+          totalModules={currentModules.length}
           completedModulesCount={progress.modulesCompleted.length}
           xp={progress.xp}
           certificateEarned={certificateEarned}
@@ -403,7 +410,7 @@ function MainApp() {
         {activeTab === 'modules' && (
           <div className="space-y-10">
             <LearningModules
-              modules={INDUCTION_MODULES}
+              modules={currentModules}
               completedModules={progress.modulesCompleted}
               onCompleteModule={handleCompleteModule}
               onOpenClassifier={() => setActiveTab('rights_duties')}
@@ -416,16 +423,16 @@ function MainApp() {
                 <div className="flex items-center gap-2">
                   <Award className="w-5 h-5 text-amber-500" />
                   <h3 className="text-base font-bold text-[#00324D] dark:text-white">
-                    Insignias de Logro y Progresión
+                    {t.badgesTitle}
                   </h3>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                  {progress.unlockedBadges.length} de {INDUCTION_BADGES.length} insignias desbloqueadas
+                  {progress.unlockedBadges.length} / {currentBadges.length} {t.badgesUnlockedText}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {INDUCTION_BADGES.map((badge) => {
+                {currentBadges.map((badge) => {
                   const isUnlocked = progress.unlockedBadges.includes(badge.id);
                   return (
                     <div
@@ -448,7 +455,7 @@ function MainApp() {
                         {badge.description}
                       </p>
                       <div className="text-[10px] font-mono font-semibold text-slate-400 pt-1">
-                        {isUnlocked ? '✓ Desbloqueada' : `${badge.requiredXp} XP`}
+                        {isUnlocked ? t.badgeUnlockedLabel : `${badge.requiredXp} XP`}
                       </div>
                     </div>
                   );
@@ -472,10 +479,10 @@ function MainApp() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
               <div className="border-b border-slate-100 dark:border-slate-800 pb-3">
                 <span className="text-xs font-mono font-bold text-[#39A900] uppercase">
-                  Normatividad Comparativa Oficial
+                  {t.comparativeTitleTag}
                 </span>
                 <h3 className="text-lg font-bold text-[#00324D] dark:text-white mt-0.5">
-                  Catálogo de Derechos y Deberes (Acuerdo 0009 de 2024 & Ac. 002/2026)
+                  {t.comparativeCatalogTitle}
                 </h3>
               </div>
 
@@ -484,10 +491,10 @@ function MainApp() {
                 <div className="p-4 rounded-xl bg-blue-50/40 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/60 space-y-3">
                   <div className="flex items-center gap-2 text-sm font-bold text-blue-900 dark:text-blue-300">
                     <Scale className="w-4 h-4 text-blue-600" />
-                    <span>Derechos Fundamentales del Aprendiz (Capítulo II · Artículo 7)</span>
+                    <span>{t.fundamentalRightsTitle}</span>
                   </div>
                   <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
-                    {DERECHOS_DEBERES_ITEMS.filter((i) => i.type === 'derecho').map((item) => (
+                    {currentDerechosDeberes.filter((i) => i.type === 'derecho').map((item) => (
                       <li key={item.id} className="flex items-start gap-2 bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-lg border border-blue-100 dark:border-blue-900/40">
                         <span className="font-bold text-blue-600 dark:text-blue-400">✓</span>
                         <div className="space-y-0.5">
@@ -503,10 +510,10 @@ function MainApp() {
                 <div className="p-4 rounded-xl bg-emerald-50/40 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-900/60 space-y-3">
                   <div className="flex items-center gap-2 text-sm font-bold text-emerald-900 dark:text-emerald-300">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                    <span>Deberes y Prohibiciones Esenciales (Capítulos IV y V)</span>
+                    <span>{t.essentialDutiesTitle}</span>
                   </div>
                   <ul className="space-y-2 text-xs text-slate-700 dark:text-slate-300">
-                    {DERECHOS_DEBERES_ITEMS.filter((i) => i.type === 'deber').map((item) => (
+                    {currentDerechosDeberes.filter((i) => i.type === 'deber').map((item) => (
                       <li key={item.id} className="flex items-start gap-2 bg-white/80 dark:bg-slate-800/80 p-2.5 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
                         <span className="font-bold text-emerald-600 dark:text-emerald-400">●</span>
                         <div className="space-y-0.5">
@@ -567,18 +574,17 @@ function MainApp() {
               </div>
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-[#00324D] dark:text-white">
-                  Certificado aún no desbloqueado
+                  {t.certificateLockedTitle}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                  Para obtener tu constancia institucional de 40 Horas de Inducción SENA, debes rendir y aprobar la 
-                  evaluación formativa gamificada con un puntaje mínimo del 70%.
+                  {t.certificateLockedDescription}
                 </p>
               </div>
               <button
                 onClick={() => setActiveTab('quiz')}
                 className="px-6 py-2.5 text-xs font-bold text-white bg-[#39A900] hover:bg-[#329600] rounded-lg shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
               >
-                <span>Ir a la Evaluación Gamificada</span>
+                <span>{t.btnGoToQuiz}</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
@@ -591,14 +597,14 @@ function MainApp() {
         <button
           onClick={() => setIsMentorModalOpen(true)}
           className="px-4 py-3 bg-[#00324D] dark:bg-slate-900 hover:bg-[#002538] dark:hover:bg-slate-800 text-white rounded-2xl shadow-xl border border-white/20 dark:border-slate-700 transition-all flex items-center gap-2.5 cursor-pointer hover:scale-105 active:scale-95 group backdrop-blur-md"
-          title="Consultorio Normativo SENA con SofIA"
+          title={t.askSofiaTooltip}
         >
           <div className="w-7 h-7 rounded-lg bg-[#39A900] flex items-center justify-center text-white font-black text-xs">
             S
           </div>
           <div className="text-left hidden sm:block">
-            <span className="text-xs font-bold block leading-none">Consultar a SofIA</span>
-            <span className="text-[10px] text-slate-300 dark:text-slate-400 leading-none">Dudas de Reglamento</span>
+            <span className="text-xs font-bold block leading-none">{t.askSofiaTitle}</span>
+            <span className="text-[10px] text-slate-300 dark:text-slate-400 leading-none">{t.askSofiaSubtitle}</span>
           </div>
         </button>
       </div>
@@ -640,17 +646,17 @@ function MainApp() {
             <div>
               <span className="font-bold text-slate-800 dark:text-slate-200">Servicio Nacional de Aprendizaje - SENA</span>
               <span className="text-slate-400 block text-[11px]">
-                Reglamento del Aprendiz SENA · Acuerdo 0009 de 2024 & Acuerdo 002 de 2026 · República de Colombia
+                {t.footerRights}
               </span>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
-            <span>Formación Profesional Integral</span>
+            <span>{t.fpiBadge}</span>
             <span aria-hidden="true">·</span>
-            <span>Etapa Lectiva y Productiva</span>
+            <span>{t.lectivaProductiva}</span>
             <span aria-hidden="true">·</span>
-            <span>República de Colombia</span>
+            <span>{t.republicOfColombia}</span>
           </div>
         </div>
       </footer>

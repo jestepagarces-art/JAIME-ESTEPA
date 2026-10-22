@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Scale, ShieldCheck, Check, X, RotateCcw, Sparkles } from 'lucide-react';
-import { DERECHOS_DEBERES_ITEMS } from '../data/senaData';
+import { getDerechosDeberes } from '../data/senaData';
+import { useLanguage } from '../context/LanguageContext';
 
 interface RightsDutiesClassifierProps {
   onGainXp: (amount: number) => void;
@@ -11,13 +12,18 @@ export const RightsDutiesClassifier: React.FC<RightsDutiesClassifierProps> = ({
   onGainXp,
   onFinished,
 }) => {
+  const { t, language } = useLanguage();
+  const items = getDerechosDeberes(language);
+
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState<boolean | null>(null);
   const [completed, setCompleted] = useState<boolean>(false);
 
-  const currentItem = DERECHOS_DEBERES_ITEMS[currentIndex];
+  // Guard if currentIndex exceeds items
+  const safeIndex = Math.min(currentIndex, items.length - 1);
+  const currentItem = items[safeIndex];
 
   const handleClassify = (chosenType: 'derecho' | 'deber') => {
     if (showFeedback || completed) return;
@@ -36,7 +42,7 @@ export const RightsDutiesClassifier: React.FC<RightsDutiesClassifierProps> = ({
     setShowFeedback(false);
     setLastAnswerCorrect(null);
 
-    if (currentIndex + 1 < DERECHOS_DEBERES_ITEMS.length) {
+    if (currentIndex + 1 < items.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
       setCompleted(true);
@@ -57,41 +63,37 @@ export const RightsDutiesClassifier: React.FC<RightsDutiesClassifierProps> = ({
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
-          <span>Dinámica Gamificada</span>
-          <span aria-hidden="true">·</span>
-          <span>Capítulos II y III</span>
-          <span aria-hidden="true">·</span>
-          <span>Acuerdo 0009 de 2024</span>
+        <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+          <span>{t.classifierBadge}</span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00324D] tracking-tight">
-          Desafío: ¿Derecho o Deber del Aprendiz?
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#00324D] dark:text-white tracking-tight">
+          {t.classifierTitle}
         </h2>
-        <p className="text-sm text-slate-600 max-w-lg mx-auto">
-          Pon a prueba tu agilidad distinguiendo las garantías que te otorga el SENA frente a los compromisos que adquieres como aprendiz.
+        <p className="text-sm text-slate-600 dark:text-slate-300 max-w-lg mx-auto">
+          {t.classifierSubtitle}
         </p>
       </div>
 
       {!completed ? (
-        <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
           {/* Progress Strip */}
-          <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-3">
             <span>
-              Enunciado <strong className="font-mono text-slate-800">{currentIndex + 1}</strong> de{' '}
-              <span className="font-mono">{DERECHOS_DEBERES_ITEMS.length}</span>
+              {t.itemCounterLabel} <strong className="font-mono text-slate-800 dark:text-slate-100">{safeIndex + 1}</strong> /{' '}
+              <span className="font-mono">{items.length}</span>
             </span>
-            <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
+            <div className="flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Aciertos: <strong className="font-mono">{score}</strong></span>
+              <span>{t.scoreLabel} <strong className="font-mono">{score}</strong></span>
             </div>
           </div>
 
           {/* Statement Box */}
           <div className="py-6 sm:py-8 text-center space-y-3">
-            <span className="text-xs uppercase font-bold text-slate-400 tracking-wider">
+            <span className="text-xs uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">
               {currentItem.category}
             </span>
-            <p className="text-lg sm:text-xl font-bold text-slate-900 max-w-xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white max-w-xl mx-auto leading-relaxed">
               "{currentItem.text}"
             </p>
           </div>
@@ -101,56 +103,67 @@ export const RightsDutiesClassifier: React.FC<RightsDutiesClassifierProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <button
                 onClick={() => handleClassify('derecho')}
-                className="py-4 px-6 rounded-xl border-2 border-blue-500/40 bg-blue-50/50 hover:bg-blue-100/60 text-blue-900 font-bold text-base transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-blue-500 shadow-xs active:scale-[0.99]"
+                className="py-4 px-6 rounded-xl border-2 border-blue-500/40 bg-blue-50/50 dark:bg-blue-950/40 hover:bg-blue-100/60 dark:hover:bg-blue-900/50 text-blue-900 dark:text-blue-200 font-bold text-base transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-blue-500 shadow-xs active:scale-[0.99]"
               >
-                <Scale className="w-5 h-5 text-blue-600" />
-                <span>Es un DERECHO</span>
+                <Scale className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <span>{t.btnIsRight}</span>
               </button>
 
               <button
                 onClick={() => handleClassify('deber')}
-                className="py-4 px-6 rounded-xl border-2 border-emerald-500/40 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-900 font-bold text-base transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-emerald-500 shadow-xs active:scale-[0.99]"
+                className="py-4 px-6 rounded-xl border-2 border-emerald-500/40 bg-emerald-50/50 dark:bg-emerald-950/40 hover:bg-emerald-100/60 dark:hover:bg-emerald-900/50 text-emerald-900 dark:text-emerald-200 font-bold text-base transition-all flex items-center justify-center gap-3 cursor-pointer hover:border-emerald-500 shadow-xs active:scale-[0.99]"
               >
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
-                <span>Es un DEBER</span>
+                <ShieldCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <span>{t.btnIsDuty}</span>
               </button>
             </div>
           ) : (
             /* Instant Normative Feedback */
             <div className={`p-5 rounded-xl border ${
               lastAnswerCorrect 
-                ? 'bg-emerald-50 border-emerald-300 text-emerald-950' 
-                : 'bg-rose-50 border-rose-300 text-rose-950'
+                ? 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-950 dark:text-emerald-100' 
+                : 'bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-950 dark:text-rose-100'
             } space-y-3 animate-fadeIn`}>
               <div className="flex items-center gap-2 font-bold text-sm">
                 {lastAnswerCorrect ? (
                   <>
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    <span>¡Correcto! (+25 XP)</span>
+                    <Check className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                    <span>{t.correctAnswerTitle} (+25 XP)</span>
                   </>
                 ) : (
                   <>
-                    <X className="w-5 h-5 text-rose-600" />
-                    <span>Respuesta incorrecta</span>
+                    <X className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+                    <span>{t.incorrectAnswerTitle}</span>
                   </>
                 )}
               </div>
 
               <p className="text-xs leading-relaxed">
-                Este enunciado corresponde a un{' '}
-                <strong className="uppercase font-bold">{currentItem.type}</strong> del aprendiz.
+                {language === 'en'
+                  ? `This statement corresponds to a ${currentItem.type === 'derecho' ? 'RIGHT' : 'DUTY'} of the apprentice.`
+                  : `Este enunciado corresponde a un ${currentItem.type.toUpperCase()} del aprendiz.`
+                }
               </p>
 
-              <div className="text-[11px] font-mono text-slate-700 bg-white/70 p-2 rounded border border-black/5">
-                Fundamento normativo: {currentItem.article} del Reglamento del Aprendiz SENA.
+              {currentItem.explanation && (
+                <p className="text-xs text-slate-700 dark:text-slate-300 italic">
+                  {currentItem.explanation}
+                </p>
+              )}
+
+              <div className="text-[11px] font-mono text-slate-700 dark:text-slate-300 bg-white/70 dark:bg-slate-800/80 p-2 rounded border border-black/5 dark:border-white/5">
+                {t.legalBasisLabel} {currentItem.article}
               </div>
 
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={handleNext}
-                  className="px-5 py-2 text-xs font-bold text-white bg-[#00324D] hover:bg-[#002538] rounded-lg cursor-pointer transition-colors"
+                  className="px-5 py-2 text-xs font-bold text-white bg-[#00324D] dark:bg-slate-800 hover:bg-[#002538] dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors"
                 >
-                  {currentIndex + 1 < DERECHOS_DEBERES_ITEMS.length ? 'Siguiente enunciado' : 'Ver resultados'}
+                  {safeIndex + 1 < items.length 
+                    ? t.btnNextItem 
+                    : (language === 'en' ? 'View Results →' : 'Ver resultados →')
+                  }
                 </button>
               </div>
             </div>
@@ -158,32 +171,34 @@ export const RightsDutiesClassifier: React.FC<RightsDutiesClassifierProps> = ({
         </div>
       ) : (
         /* Completion Screen */
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-5 shadow-xs">
-          <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-[#39A900]">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-5 shadow-xs">
+          <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-950/80 rounded-full flex items-center justify-center mx-auto text-[#39A900] dark:text-emerald-400">
             <Sparkles className="w-7 h-7" />
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-xl font-extrabold text-[#00324D]">
-              ¡Desafío de Clasificación Completado!
+            <h3 className="text-xl font-extrabold text-[#00324D] dark:text-white">
+              {t.classifierCompletedTitle}
             </h3>
-            <p className="text-sm text-slate-600">
-              Obtuviste <strong className="text-slate-900 font-mono">{score}</strong> de{' '}
-              <strong className="font-mono">{DERECHOS_DEBERES_ITEMS.length}</strong> aciertos y ganaste +100 XP extra.
+            <p className="text-sm text-slate-600 dark:text-slate-300">
+              {language === 'en' 
+                ? `You scored ${score} out of ${items.length} correct answers and earned +100 XP!`
+                : `Obtuviste ${score} de ${items.length} aciertos y ganaste +100 XP extra.`
+              }
             </p>
           </div>
 
-          <div className="max-w-xs mx-auto p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
-            Ahora tienes claridad sobre las garantías institucionales y las responsabilidades éticas en tu centro de formación.
+          <div className="max-w-md mx-auto p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-600 dark:text-slate-300">
+            {t.classifierCompletedDesc}
           </div>
 
           <div className="flex items-center justify-center gap-3 pt-2">
             <button
               onClick={handleReset}
-              className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Repetir reto</span>
+              <span>{t.btnRestartClassifier}</span>
             </button>
           </div>
         </div>

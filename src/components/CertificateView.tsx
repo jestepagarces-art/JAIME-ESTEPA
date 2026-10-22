@@ -3,9 +3,7 @@ import {
   Printer, 
   Copy, 
   Check, 
-  Share2, 
   ShieldCheck, 
-  Calendar, 
   QrCode, 
   Award,
   Edit3,
@@ -13,6 +11,7 @@ import {
 } from 'lucide-react';
 import { ApprenticeProfile } from '../types/induction';
 import { SENA_LOGO_DATA_URI } from '../assets/senaLogoDataUri';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CertificateViewProps {
   profile: ApprenticeProfile;
@@ -31,6 +30,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
   onEditProfile,
   onOpenGoogleDrive,
 }) => {
+  const { t, language } = useLanguage();
   const [copied, setCopied] = useState<boolean>(false);
 
   const handleCopyCode = () => {
@@ -43,7 +43,8 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
     window.print();
   };
 
-  const formattedDate = new Date(issueDate).toLocaleDateString('es-CO', {
+  const locale = language === 'en' ? 'en-US' : 'es-CO';
+  const formattedDate = new Date(issueDate).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -52,17 +53,17 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
   return (
     <div className="space-y-6">
       {/* Action Bar (hidden on print) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white border border-slate-200 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#39A900] flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/80 text-[#39A900] dark:text-emerald-400 flex items-center justify-center font-bold">
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[#00324D]">
-              Certificado Institucional de Inducción SENA
+            <h3 className="text-sm font-bold text-[#00324D] dark:text-white">
+              {language === 'en' ? 'SENA Institutional Induction Certificate' : 'Certificado Institucional de Inducción SENA'}
             </h3>
-            <p className="text-xs text-slate-500 font-mono">
-              Código de verificación: <span className="font-bold text-slate-800">{verificationCode}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+              {t.certVerificationCodeLabel} <span className="font-bold text-slate-800 dark:text-slate-100">{verificationCode}</span>
             </p>
           </div>
         </div>
@@ -72,10 +73,10 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
             <button
               onClick={onOpenGoogleDrive}
               className="px-3 py-1.5 text-xs font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
-              title="Guardar registro del aprendiz y certificado en Google Sheets"
+              title={language === 'en' ? 'Save apprentice record and certificate to Google Sheets' : 'Guardar registro del aprendiz y certificado en Google Sheets'}
             >
               <FileSpreadsheet className="w-3.5 h-3.5 text-[#39A900]" />
-              <span>Hoja en Google Drive</span>
+              <span>{t.dashBtnSyncDrive}</span>
             </button>
           )}
 
@@ -84,7 +85,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
             className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Editar Datos</span>
+            <span>{t.btnEditApprenticeProfile}</span>
           </button>
 
           <button
@@ -92,7 +93,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
             className="px-3 py-1.5 text-xs font-semibold text-[#00324D] dark:text-sky-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copied ? '¡Copiado!' : 'Copiar Código'}</span>
+            <span>{copied ? t.btnCodeCopied : t.btnCopyVerificationCode}</span>
           </button>
 
           <button
@@ -100,7 +101,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
             className="px-4 py-1.5 text-xs font-bold text-white bg-[#39A900] hover:bg-[#329600] rounded-lg shadow-sm transition-all cursor-pointer flex items-center gap-1.5"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>Imprimir / Guardar en PDF</span>
+            <span>{t.btnPrintCertificate}</span>
           </button>
         </div>
       </div>
@@ -142,10 +143,10 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
 
             <div className="pt-2">
               <span className="text-xs uppercase tracking-widest font-extrabold text-[#00324D] block">
-                República de Colombia
+                {t.republicOfColombia}
               </span>
               <span className="text-sm uppercase tracking-wider font-extrabold text-[#39A900] block">
-                Servicio Nacional de Aprendizaje - SENA
+                {t.certSenaHeader}
               </span>
               <span className="text-[11px] text-slate-500 font-medium block">
                 {profile.regional} · {profile.center}
@@ -154,10 +155,13 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
 
             <div className="pt-3">
               <h2 className="text-xl sm:text-2xl font-serif font-black tracking-wide text-[#00324D] uppercase border-y-2 border-[#00324D]/30 py-1.5 px-4">
-                Constancia de Aprobación de Inducción
+                {language === 'en' ? 'Certificate of Induction Approval' : 'Constancia de Aprobación de Inducción'}
               </h2>
               <span className="text-xs font-semibold text-slate-600 block mt-1">
-                Apropiación del Reglamento del Aprendiz SENA (Acuerdo 0009 de 2024 & Acuerdo 002 de 2026)
+                {language === 'en' 
+                  ? 'Mastery of SENA Apprentice Regulations (Agreement 0009 of 2024 & Agreement 002 of 2026)' 
+                  : 'Apropiación del Reglamento del Aprendiz SENA (Acuerdo 0009 de 2024 & Acuerdo 002 de 2026)'
+                }
               </span>
             </div>
           </div>
@@ -165,7 +169,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
           {/* Certificate Body */}
           <div className="text-center space-y-6">
             <p className="text-sm text-slate-600 font-medium">
-              El Centro de Formación Profesional Integral hace constar que:
+              {t.certConfersTo}
             </p>
 
             <div className="space-y-1">
@@ -173,14 +177,27 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
                 {profile.fullName.toUpperCase()}
               </h1>
               <p className="text-xs font-mono text-slate-600 pt-2">
-                Identificado(a) con {profile.docType} No. <strong className="text-slate-900">{profile.docNumber}</strong>
+                {t.certDocumentLabel} {profile.docType} No. <strong className="text-slate-900">{profile.docNumber}</strong>
               </p>
             </div>
 
             <p className="text-sm text-slate-700 max-w-2xl mx-auto leading-relaxed">
-              Completó satisfactoriamente la etapa de <strong className="font-bold text-[#00324D]">Inducción Institucional de 40 Horas</strong>, 
-              demostrando dominio y compromiso con los <strong className="font-bold text-slate-900">Derechos, Deberes, Prohibiciones y Trámites</strong> establecidos 
-              en el Reglamento del Aprendiz SENA, obteniendo una calificación del <strong className="font-mono font-bold text-[#39A900]">{score}%</strong> en la evaluación formativa.
+              {language === 'en' 
+                ? (
+                  <>
+                    Has successfully completed the <strong className="font-bold text-[#00324D]">40-Hour Institutional Induction Stage</strong>, 
+                    demonstrating commitment and regulatory mastery of the <strong className="font-bold text-slate-900">Rights, Duties, Prohibitions, and Procedures</strong> set 
+                    forth in the SENA Apprentice Regulations, obtaining a score of <strong className="font-mono font-bold text-[#39A900]">{score}%</strong> in the formative evaluation.
+                  </>
+                )
+                : (
+                  <>
+                    Completó satisfactoriamente la etapa de <strong className="font-bold text-[#00324D]">Inducción Institucional de 40 Horas</strong>, 
+                    demostrando dominio y compromiso con los <strong className="font-bold text-slate-900">Derechos, Deberes, Prohibiciones y Trámites</strong> establecidos 
+                    en el Reglamento del Aprendiz SENA, obteniendo una calificación del <strong className="font-mono font-bold text-[#39A900]">{score}%</strong> en la evaluación formativa.
+                  </>
+                )
+              }
             </p>
 
             {/* Academic Program Box */}
@@ -189,11 +206,11 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
                 {profile.program}
               </div>
               <div className="flex flex-wrap items-center justify-center gap-3 text-slate-600 font-mono text-[11px]">
-                <span>Ficha: <strong>{profile.ficha}</strong></span>
+                <span>{t.certFichaLabel} <strong>{profile.ficha}</strong></span>
                 <span>·</span>
-                <span>Modalidad: <strong>{profile.modality}</strong></span>
+                <span>{t.modalityLabel}: <strong>{profile.modality}</strong></span>
                 <span>·</span>
-                <span>Jornada: <strong>{profile.jornada}</strong></span>
+                <span>{t.jornadaLabel}: <strong>{profile.jornada}</strong></span>
               </div>
             </div>
           </div>
@@ -206,8 +223,8 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
                 Dr. Hernando Gómez P.
               </div>
               <div className="border-t border-slate-400 pt-1 text-[11px] text-slate-600">
-                <strong className="block text-slate-900">Subdirector de Centro</strong>
-                <span>Centro de Formación SENA</span>
+                <strong className="block text-slate-900">{language === 'en' ? 'Center Subdirector' : 'Subdirector de Centro'}</strong>
+                <span>{language === 'en' ? 'SENA Training Center' : 'Centro de Formación SENA'}</span>
               </div>
             </div>
 
@@ -221,7 +238,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
               </div>
               <div className="flex items-center gap-1 text-[10px] text-emerald-700 font-semibold">
                 <ShieldCheck className="w-3 h-3" />
-                <span>Documento Verificado</span>
+                <span>{language === 'en' ? 'Verified Document' : 'Documento Verificado'}</span>
               </div>
             </div>
 
@@ -231,16 +248,16 @@ export const CertificateView: React.FC<CertificateViewProps> = ({
                 Dra. Patricia Salamanca M.
               </div>
               <div className="border-t border-slate-400 pt-1 text-[11px] text-slate-600">
-                <strong className="block text-slate-900">Coordinación de Formación</strong>
-                <span>Comité de Evaluación y Seguimiento</span>
+                <strong className="block text-slate-900">{language === 'en' ? 'Training Coordination' : 'Coordinación de Formación'}</strong>
+                <span>{language === 'en' ? 'Evaluation and Follow-up Committee' : 'Comité de Evaluación y Seguimiento'}</span>
               </div>
             </div>
           </div>
 
           {/* Certificate Footer Line */}
           <div className="pt-2 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 font-mono">
-            <span>Expedido el {formattedDate}</span>
-            <span>Validez oficial nacional · Sistema de Gestión SENA</span>
+            <span>{t.certIssueDateLabel} {formattedDate}</span>
+            <span>{language === 'en' ? 'Official nationwide validity · SENA Management System' : 'Validez oficial nacional · Sistema de Gestión SENA'}</span>
           </div>
         </div>
       </div>

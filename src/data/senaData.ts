@@ -891,3 +891,36 @@ export const STRUCTURED_INDUCTION_PLAN = [
     deliverable: 'Certificado Institucional de Inducción SENA (40 Horas) aprobado y generado.',
   },
 ];
+
+import {
+  INDUCTION_MODULES_EN,
+  DERECHOS_DEBERES_ITEMS_EN,
+  SIMULATION_CASES_EN,
+  QUIZ_QUESTIONS_EN,
+  INDUCTION_BADGES_EN,
+  STRUCTURED_INDUCTION_PLAN_EN,
+} from './senaDataEn';
+
+export const getInductionModules = (lang: 'es' | 'en' = 'es'): ModuleItem[] => {
+  return lang === 'en' ? INDUCTION_MODULES_EN : INDUCTION_MODULES;
+};
+
+export const getDerechosDeberes = (lang: 'es' | 'en' = 'es') => {
+  return lang === 'en' ? DERECHOS_DEBERES_ITEMS_EN : DERECHOS_DEBERES_ITEMS;
+};
+
+export const getSimulationCases = (lang: 'es' | 'en' = 'es'): SimulationCase[] => {
+  return lang === 'en' ? SIMULATION_CASES_EN : SIMULATION_CASES;
+};
+
+export const getQuizQuestions = (lang: 'es' | 'en' = 'es'): QuizQuestion[] => {
+  return lang === 'en' ? QUIZ_QUESTIONS_EN : QUIZ_QUESTIONS;
+};
+
+export const getInductionBadges = (lang: 'es' | 'en' = 'es'): InductionBadge[] => {
+  return lang === 'en' ? INDUCTION_BADGES_EN : INDUCTION_BADGES;
+};
+
+export const getStructuredInductionPlan = (lang: 'es' | 'en' = 'es') => {
+  return lang === 'en' ? STRUCTURED_INDUCTION_PLAN_EN : STRUCTURED_INDUCTION_PLAN;
+};

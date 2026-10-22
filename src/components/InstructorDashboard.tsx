@@ -29,6 +29,7 @@ import { subscribeToSyncState, AutoSyncState } from '../services/autoSyncService
 import { SAMPLE_COHORT_APPRENTICES } from '../data/sampleCohort';
 import { ApprenticeProfile, InductionProgress } from '../types/induction';
 import { googleSignIn } from '../services/googleAuth';
+import { useLanguage } from '../context/LanguageContext';
 
 interface InstructorDashboardProps {
   onOpenDriveModal: () => void;
@@ -43,6 +44,7 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
   currentApprenticeProfile,
   currentApprenticeProgress,
 }) => {
+  const { t, language } = useLanguage();
   const [syncState, setSyncState] = useState<AutoSyncState>({
     status: 'idle',
     lastSyncTime: null,
@@ -284,13 +286,13 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold">
               <ShieldCheck className="w-4 h-4 text-[#39A900]" />
-              <span>Perfil de Instructor SENA · Privilegios de Coordinación</span>
+              <span>{language === 'en' ? 'SENA Instructor Profile · Coordination Privileges' : 'Perfil de Instructor SENA · Privilegios de Coordinación'}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Panel de Seguimiento y Gestión de Aprendices
+              {t.dashTitle}
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Supervisa en tiempo real el progreso de inducción de tus aprendices, genera y comparte el enlace directo para la cohorte y sincroniza automáticamente las calificaciones y certificados con tu hoja de cálculo en Google Drive.
+              {t.dashSubtitle}
             </p>
           </div>
 
@@ -298,10 +300,10 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
             <button
               onClick={onSwitchToStudentView}
               className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 shadow-xs backdrop-blur-sm"
-              title="Ver el prototipo exactamente como lo ven los aprendices"
+              title={language === 'en' ? 'View the prototype as apprentices see it' : 'Ver el prototipo exactamente como lo ven los aprendices'}
             >
               <Eye className="w-4 h-4 text-emerald-400" />
-              <span>Ver Vista Aprendiz</span>
+              <span>{t.dashBtnLearnerView}</span>
             </button>
 
             {syncState.spreadsheetInfo?.webViewLink ? (
@@ -312,7 +314,7 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
                 className="px-4 py-2.5 rounded-xl bg-[#39A900] hover:bg-[#329600] text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm"
               >
                 <FileSpreadsheet className="w-4 h-4" />
-                <span>Abrir Hoja en Drive</span>
+                <span>{language === 'en' ? 'Open Sheet in Drive' : 'Abrir Hoja en Drive'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             ) : (
@@ -321,7 +323,7 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
                 className="px-4 py-2.5 rounded-xl bg-[#39A900] hover:bg-[#329600] text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-2 shadow-sm"
               >
                 <Cloud className="w-4 h-4" />
-                <span>Configurar Google Drive</span>
+                <span>{t.dashBtnSyncDrive}</span>
               </button>
             )}
           </div>
@@ -673,14 +675,14 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-semibold">
-                <th className="py-3 px-4">Aprendiz</th>
-                <th className="py-3 px-4">Documento</th>
-                <th className="py-3 px-4">Ficha & Programa</th>
-                <th className="py-3 px-4">Avance Módulos</th>
-                <th className="py-3 px-4">Evaluación</th>
-                <th className="py-3 px-4">Estado</th>
-                <th className="py-3 px-4">Código Certificado</th>
-                <th className="py-3 px-4 text-right">Acción</th>
+                <th className="py-3 px-4">{t.dashColLearner}</th>
+                <th className="py-3 px-4">{t.dashColDoc}</th>
+                <th className="py-3 px-4">{t.dashColFicha} & {t.programLabel}</th>
+                <th className="py-3 px-4">{t.dashColProgress}</th>
+                <th className="py-3 px-4">{t.dashColScore}</th>
+                <th className="py-3 px-4">{t.dashColStatus}</th>
+                <th className="py-3 px-4">{t.dashColCertificate}</th>
+                <th className="py-3 px-4 text-right">{language === 'en' ? 'Action' : 'Acción'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
