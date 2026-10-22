@@ -16,6 +16,7 @@ import {
   Volume2
 } from 'lucide-react';
 import { SENA_LOGO_DATA_URI } from '../assets/senaLogoDataUri';
+import { useLanguage } from '../context/LanguageContext';
 
 export const OFFICIAL_TUTORIAL_VIDEO = '/assets/aistudio/Guia_Induccion_SENA_LogoOficial.pptx_debbdcd1.mp4';
 
@@ -97,6 +98,7 @@ export const TutorialFloatingVideo: React.FC<TutorialFloatingVideoProps> = ({
   videoUrl: propVideoUrl,
   onVideoUrlChange,
 }) => {
+  const { t } = useLanguage();
   // Initialize with official video or prop or stored URL
   const [currentUrl, setCurrentUrl] = useState<string>(() => {
     return propVideoUrl || localStorage.getItem(STORAGE_KEY) || OFFICIAL_TUTORIAL_VIDEO;
@@ -237,15 +239,15 @@ export const TutorialFloatingVideo: React.FC<TutorialFloatingVideoProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
-                  Guía de Inducción SENA · Video Tutorial Oficial
+                  {t.floatingPiPTitle}
                 </h3>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#39A900]/30 text-emerald-300 text-[10px] font-bold border border-[#39A900]/50">
                   <Play className="w-2.5 h-2.5 fill-current" />
-                  Manual Interactivo
+                  {t.videoTutorialBadge}
                 </span>
               </div>
               <p className="text-[11px] text-slate-300">
-                Aprende paso a paso cómo caracterizarte, realizar los módulos y obtener tu certificado oficial
+                {t.videoTutorialSubtitle}
               </p>
             </div>
           </div>
@@ -397,10 +399,10 @@ export const TutorialFloatingVideo: React.FC<TutorialFloatingVideoProps> = ({
           <div className="flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#39A900]"></span>
             <span className="font-semibold text-slate-800 dark:text-slate-200 text-xs">
-              Controles multimedia activos
+              {t.activeControlsNotice.split('·')[0]}
             </span>
             <span className="text-[11px] text-slate-400">
-              · Usa la barra inferior para pausar, avanzar, ajustar volumen, velocidad y pantalla completa.
+              · {t.activeControlsNotice.split('·')[1]}
             </span>
           </div>
 
@@ -409,17 +411,17 @@ export const TutorialFloatingVideo: React.FC<TutorialFloatingVideoProps> = ({
               type="button"
               onClick={handleCopyDirectLink}
               className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[11px] font-medium hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer flex items-center gap-1.5 transition-colors"
-              title="Copiar enlace del video"
+              title={t.copyLink}
             >
               {copiedLink ? (
                 <>
                   <Check className="w-3.5 h-3.5 text-[#39A900]" />
-                  <span>Copiado</span>
+                  <span>{t.linkCopied}</span>
                 </>
               ) : (
                 <>
                   <Link2 className="w-3.5 h-3.5" />
-                  <span>Copiar Enlace</span>
+                  <span>{t.copyLink}</span>
                 </>
               )}
             </button>
@@ -428,10 +430,10 @@ export const TutorialFloatingVideo: React.FC<TutorialFloatingVideoProps> = ({
               type="button"
               onClick={() => setWindowMode('pip')}
               className="px-3 py-1.5 rounded-lg bg-[#00324D] hover:bg-[#00253a] text-white text-[11px] font-bold cursor-pointer flex items-center gap-1.5 transition-colors"
-              title="Seguir viendo mientras navegas en la plataforma"
+              title={t.minimizedPiP}
             >
               <Minimize2 className="w-3.5 h-3.5" />
-              <span>Ver en Ventana Flotante (PiP)</span>
+              <span>{t.minimizedPiP}</span>
             </button>
           </div>
         </div>

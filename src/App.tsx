@@ -29,8 +29,9 @@ import {
   Users,
   Eye
 } from 'lucide-react';
+import { LanguageProvider } from './context/LanguageContext';
 
-export default function App() {
+function MainApp() {
   // Determine if there's a URL role hint (e.g. ?role=aprendiz or ?role=instructor)
   const urlRoleHint: 'instructor' | 'aprendiz' = (() => {
     try {
@@ -656,3 +657,12 @@ export default function App() {
     </div>
   );
 }
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <MainApp />
+    </LanguageProvider>
+  );
+}
+
