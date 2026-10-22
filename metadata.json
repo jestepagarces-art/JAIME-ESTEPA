@@ -1,0 +1,8 @@
+{
+  "name": "Remix Inducción SENA - Reglamento del Aprendiz",
+  "description": "Plataforma interactiva de inducción institucional al Reglamento del Aprendiz SENA (Acuerdo 0009 de 2024 con ajuste Acuerdo 002 de 2026): derechos, deberes, simulador de casos y certificación oficial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
